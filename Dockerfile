@@ -1,5 +1,7 @@
-FROM php:8.1-cli
-COPY . /var/www/php
-EXPOSE 8000
-RUN adduser rouser
-CMD ["su", "-", "rouser", "-c", "cd /var/www/php && php -S 0.0.0.0:8000"]
+FROM php:7-apache
+
+RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+COPY . /var/www/html
+RUN chown -R www-data:www-data /var/www/html
