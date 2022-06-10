@@ -1,6 +1,19 @@
-FROM php:8.0-apache
-WORKDIR /var/www/html
+FROM node:10
 
-COPY index.php index.php
+WORKDIR /usr/src/app
 
-EXPOSE 80
+ENV PORT 8080
+ENV HOST 0.0.0.0
+
+COPY package*.json ./
+
+RUN npm install --only=production
+
+# Copy the local code to the container
+COPY . .
+
+# Build production app
+# RUN npm run Build
+
+# Start the service
+CMD npm start
