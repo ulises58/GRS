@@ -2,19 +2,24 @@
 name: Build and Push Python Image to Google Cloud Platform
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 jobs:
   build-push-gcr:
     name: Build and Push to GCP
     runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: lesson-087
+      PROJECT_ID: devopsbyexample-325402
     steps:
     - id: 'auth'
       uses: 'google-github-actions/auth@v0'
       with:
         credentials_json: '${{ secrets.GCP_SA_KEY }}'
+      - uses: google-github-actions/setup-gcloud@master
 
-      - name: 'Deploy to Cloud Run'
-        uses: 'google-github-actions/deploy-cloudrun@v0'
-        with:
-          image: 'gcr.io/cloudrun/hello'
-          service: 'hello-cloud-run'
+    - name: 'Deploy to Cloud Run'
+      uses: 'google-github-actions/deploy-cloudrun@v0'
+      with:
+        image: 'gcr.io/cloudrun/hello'
+        service: 'hello-cloud-run'
+
