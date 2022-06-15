@@ -11,7 +11,7 @@ jobs:
       IMAGE_NAME: lesson-087
       PROJECT_ID: devopsbyexample-325402
     steps:
-    - id: 'auth'
+    - name: "test"
       uses: 'google-github-actions/auth@v0'
       with:
         credentials_json: '${{ secrets.GCP_SA_KEY }}'
