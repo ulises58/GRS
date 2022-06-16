@@ -8,7 +8,7 @@ jobs:
     name: Build and Push to GCP
     runs-on: ubuntu-latest
     env:
-      IMAGE_NAME: lesson-087
+      IMAGE_NAME: test
       PROJECT_ID: devopsbyexample-325402
     steps:
       - name: Repo
