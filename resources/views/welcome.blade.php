@@ -81,7 +81,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                   Stanky!
+                   Hola ulises!
                 </div>
 
                 <div class="links">
