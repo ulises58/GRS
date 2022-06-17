@@ -3,6 +3,6 @@
   <title>Prueba de PHP</title>
  </head>
  <body>
- <p>Hola mundo</p>
+ <p>El charly se la come toda riendo</p>
  </body>
 </html>
