@@ -1,4 +1,4 @@
-name: Docker
+name: Deploy to Google
 
 on:
   push:
@@ -7,34 +7,103 @@ on:
     branches: [ master ]
 
 jobs:
+  build-frontend:
 
-  deploy:
-
-    name: Setup Gcloud Account
     runs-on: ubuntu-latest
-    env:
-      IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }}
-    steps:
+    strategy:
+      matrix:
+        php: [ 8.1 ]
 
-      - name: Checkout repository
+    name: Test - PHP ${{ matrix.php }}
+
+    steps:
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Auth
-        uses: google-github-actions/auth@v0
+      - name: Cache PHP dependencies
+        uses: actions/cache@v3
         with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          path: vendor
+          key: dependencies-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.lock') }}
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd
+          coverage: none
 
-      - name: Configure Docker
-        run: gcloud auth configure-docker --quiet
+      - name: Install dependencies
+        run: composer install --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
+#      - name: set up node
+#        uses: actions/setup-node@v2
+#        with:
+#          node-version: '16'
+#
+#      - name: Cache node modules
+#        id: cache-npm
+#        uses: actions/cache@v3
+#        env:
+#          cache-name: cache-node-modules
+#        with:
+#          # npm cache files are stored in `~/.npm` on Linux/macOS
+#          path: ~/.npm
+#          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+#          restore-keys: |
+#            ${{ runner.os }}-build-${{ env.cache-name }}-
+#            ${{ runner.os }}-build-
+#            ${{ runner.os }}-
+#
+#      - if: ${{ steps.cache-npm.outputs.cache-hit == 'false' }}
+#        name: List the state of node modules
+#        continue-on-error: true
+#        run: npm list
+#
+#      - name: install dependecies
+#        run: npm install
+#
+#      - name: build production descktop
+#        run: npm run prod
+#
+#      - name: Subiendo
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: public-build
+#          path: public
 
-      - name: Build Docker image
-        run: docker build . -t $IMAGE_NAME
 
-      - name: Push Docker image
-        run: docker push $IMAGE_NAME
-
-      - name: Deploy Docker image
-        run: gcloud run deploy ${{ secrets.GCP_PROJECT_ID }} --image $IMAGE_NAME --region us-central1 --platform managed
+#  deploy:
+#    needs: [build-frontend]
+#    name: Setup Gcloud Account
+#    runs-on: ubuntu-latest
+#    env:
+#      IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }}
+#    steps:
+#
+#      - name: Checkout repository
+#        uses: actions/checkout@v3
+#
+#      - uses: actions/download-artifact@v3
+#        with:
+#          name: public-build
+#          path: public
+#
+#      - name: Auth
+#        uses: google-github-actions/auth@v0
+#        with:
+#          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+#
+#      - name: Set up Cloud SDK
+#        uses: google-github-actions/setup-gcloud@v0
+#
+#      - name: Configure Docker
+#        run: gcloud auth configure-docker --quiet
+#
+#      - name: Build Docker image
+#        run: docker build . -t $IMAGE_NAME
+#
+#      - name: Push Docker image
+#        run: docker push $IMAGE_NAME
+#
+#      - name: Deploy Docker image
+#        run: gcloud run deploy ${{ secrets.GCP_PROJECT_ID }} --image $IMAGE_NAME --region us-central1 --platform managed
